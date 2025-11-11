@@ -1,0 +1,103 @@
+{
+  "project": {
+    "name": "claims_email_doc_ingest",
+    "version": "1.0.0",
+    "environment": "poc"
+  },
+  "blob_storage": {
+    "container_name": "claims-emails",
+    "attachments_container": "claims-attachments",
+    "processed_container": "claims-processed",
+    "connection_string_key": "AZURE_STORAGE_CONNECTION_STRING"
+  },
+  "database": {
+    "server": "your-server.database.windows.net",
+    "database": "claims_db",
+    "schema": "dbo",
+    "tables": {
+      "emails": "tbl_claims_emails",
+      "entities": "tbl_extracted_entities",
+      "attachments": "tbl_attachments",
+      "invoices": "tbl_invoices",
+      "triage": "tbl_triage_results"
+    }
+  },
+  "ai_config": {
+    "endpoint": "https://api.anthropic.com/v1/messages",
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 4000,
+    "temperature": 0.0
+  },
+  "entity_extraction": {
+    "entities": {
+      "claim_number": {
+        "patterns": ["CLAIM[\\s#:-]*([A-Z0-9]{6,12})", "CLM[\\s#:-]*([A-Z0-9]{6,12})"],
+        "required": true,
+        "ai_extract": true
+      },
+      "policy_number": {
+        "patterns": ["POLICY[\\s#:-]*([A-Z0-9]{8,15})", "POL[\\s#:-]*([A-Z0-9]{8,15})"],
+        "required": true,
+        "ai_extract": true
+      },
+      "insured_name": {
+        "patterns": ["INSURED[:\\s]+([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)+)"],
+        "required": true,
+        "ai_extract": true
+      },
+      "date_of_loss": {
+        "patterns": ["LOSS DATE[:\\s]+(\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4})"],
+        "required": false,
+        "ai_extract": true
+      },
+      "claim_amount": {
+        "patterns": ["\\$([0-9,]+\\.?[0-9]*)"],
+        "required": false,
+        "ai_extract": true
+      },
+      "incident_description": {
+        "patterns": [],
+        "required": false,
+        "ai_extract": true
+      }
+    }
+  },
+  "classification": {
+    "priority_levels": {
+      "critical": ["death", "fatality", "severe injury", "litigation"],
+      "high": ["injury", "hospital", "emergency", "urgent"],
+      "medium": ["damage", "theft", "loss"],
+      "low": ["inquiry", "question", "status update"]
+    },
+    "claim_types": {
+      "auto": ["vehicle", "car", "accident", "collision", "auto", "motor"],
+      "property": ["home", "house", "property", "building", "fire", "flood", "storm"],
+      "health": ["medical", "health", "injury", "hospital", "treatment", "surgery"],
+      "liability": ["liability", "lawsuit", "legal", "negligence"],
+      "workers_comp": ["workers comp", "workplace", "employee injury", "work related"]
+    },
+    "document_types": {
+      "invoice": ["invoice", "bill", "receipt", "payment"],
+      "medical_record": ["medical record", "diagnosis", "treatment plan"],
+      "police_report": ["police report", "incident report", "law enforcement"],
+      "estimate": ["estimate", "quote", "repair cost"],
+      "photo_evidence": ["photo", "image", "picture", "evidence"]
+    }
+  },
+  "triage_rules": {
+    "high_risk_indicators": [
+      "lawyer", "attorney", "legal representation",
+      "lawsuit", "litigation", "court",
+      "death", "fatality", "wrongful death",
+      "catastrophic", "total loss"
+    ],
+    "auto_escalate_amount": 100000,
+    "require_supervisor_review": ["critical", "high"]
+  },
+  "monitoring": {
+    "teams_webhook_url_key": "TEAMS_WEBHOOK_URL",
+    "alert_on_failures": true,
+    "daily_summary": true,
+    "log_level": "INFO"
+  }
+}

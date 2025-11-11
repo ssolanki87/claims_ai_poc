@@ -1,0 +1,37 @@
+# This is a Databricks asset bundle definition for my_project.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: my_project
+  uuid: bbdd3cba-69d2-4bcf-a282-ec7e9bc8f8d6
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+
+targets:
+  dev:
+    # The default target uses 'mode: development' to create a development copy.
+    # - Deployed resources get prefixed with '[dev my_user_name]'
+    # - Any job schedules and triggers are paused by default.
+    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
+    mode: development
+    default: true
+    workspace:
+      host: https://adb-5436611115966598.18.azuredatabricks.net
+
+    presets:
+      # Set dynamic_version: true on all artifacts of type "whl".
+      # This makes "bundle deploy" add a timestamp to wheel's version before uploading,
+      # new wheel takes over the previous installation even if actual wheel version is unchanged.
+      # See https://docs.databricks.com/aws/en/dev-tools/bundles/settings
+      artifacts_dynamic_version: true
+
+  prod:
+    mode: production
+    workspace:
+      host: https://adb-5436611115966598.18.azuredatabricks.net
+      # We explicitly deploy to /Workspace/Users/ssolanki@guildinsurance.com.au to make sure we only have a single copy.
+      root_path: /Workspace/Users/ssolanki@guildinsurance.com.au/.bundle/${bundle.name}/${bundle.target}
+    permissions:
+      - user_name: ssolanki@guildinsurance.com.au
+        level: CAN_MANAGE

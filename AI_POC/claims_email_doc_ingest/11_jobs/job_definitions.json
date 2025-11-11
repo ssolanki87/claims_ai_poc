@@ -1,0 +1,14 @@
+{
+  "jobs": [
+    {
+      "name": "Full Pipeline",
+      "schedule": "0 */4 * * *",
+      "script": "pipeline_master_orchestrator.py"
+    },
+    {
+      "name": "Health Check",
+      "schedule": "0 * * * *",
+      "script": "monitor_pipeline_health.py"
+    }
+  ]
+}

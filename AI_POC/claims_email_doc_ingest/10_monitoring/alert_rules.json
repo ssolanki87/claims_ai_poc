@@ -1,0 +1,6 @@
+{
+  "pipeline_failure_threshold": 1,
+  "unprocessed_email_threshold": 10,
+  "high_risk_pending_threshold": 5,
+  "alert_channels": ["teams", "email"]
+}
